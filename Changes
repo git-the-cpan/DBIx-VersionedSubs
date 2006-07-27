@@ -1,2 +1,8 @@
+0.02 20060726
+    * Added SEE ALSO and ALTERNATIVE NAMES sections, credited Tye for the name
+    * Added missing prerequisites for the examples
+    * No functional changes in the main code
+    * Added more pod discussing the database tables
+
 0.01 20060726
     * Released on the unsuspecting world

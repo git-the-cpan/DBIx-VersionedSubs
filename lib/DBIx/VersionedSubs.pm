@@ -30,6 +30,36 @@ This module implements a minimal driver to load
 your application code from a database into a namespace
 and to update that code whenever the database changes.
 
+=head1 TABLES USED
+
+This module uses two tables in the database, C<code_live> and C<code_history>.
+The C<code_live> table stores the current version of the code and is used to
+initialize the namespace. The C<code_history> table stores all modifications
+to the C<code_live> table, that is, insertions, deletions and modifications
+of rows in it. It is used to determine if the code has changed and what
+changes to apply to the namespace to bring it up to par with the
+database version.
+
+The two tables are presumed to have a layout like the following:
+
+    create table code_live (
+        name varchar(256) not null primary key,
+        code varchar(65536) not null
+    );
+
+    create table code_history (
+        version integer primary key not null,
+        timestamp varchar(15) not null,
+        name varchar(256) not null,
+        action varchar(1) not null, -- IUD, redundant with old_* and new_*
+        old_code varchar(65536) not null,
+        new_code varchar(65536) not null
+    );
+
+Additional columns are ignored by this code. It is likely prudent
+to create an index on C<code_history.version> as that will be used
+for (descending) ordering of rows.
+
 =cut
 
 __PACKAGE__->mk_classdata($_)
@@ -37,7 +67,7 @@ __PACKAGE__->mk_classdata($_)
 
 use vars qw'%default_values $VERSION';
 
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 %default_values = (
     dbh          => undef,
@@ -48,14 +78,28 @@ $VERSION = '0.01';
     verbose      => 0,
 );
 
+=head1 CLASS METHODS
+
 =head2 C<< Package->setup >>
 
 Sets up the class data defaults:
 
-    code_source  => {},
+    code_source  => {}
     code_live    => 'code_live',
     code_history => 'code_history',
     code_version => 0,
+    verbose      => 0,
+
+C<code_source> contains the Perl source code for all loaded functions.
+C<code_live> and C<code_history> are the names of the two tables
+in which the live code and the history of changes to the live code
+are stored. C<code_version> is the version of the code when it
+was last loaded from the database.
+
+The C<verbose> setting determines if progress gets output to
+C<STDERR>.
+Likely, this package variable will get dropped in favour of
+a method to output (or discard) the progress.
 
 =cut
 
@@ -142,6 +186,12 @@ CODE
 
 Returns the version number of the live code
 in the database.
+
+This is done with a C< SELECT max(version) FROM ... > query,
+so this might scale badly on MySQL which (I hear) is bad
+with queries even against indexed tables. If this becomes
+a problem, changing the layout to a single-row table which
+stores the live version number is the best approach.
 
 =cut
 
@@ -324,8 +374,10 @@ Note that the update only happens in the database, so the change
 will only take place on the next roundtrip / code refresh.
 
 If you delete the row of a subroutine that overrides a subroutine
-declared elsewhere (for example in Perl code), the Perl code will not become
-visible to the Perl code until the next call to C<< Package->init_code >>,
+declared elsewhere (for example in Perl code), the non-database Perl code
+will not become
+visible to the Perl interpreter until the next call to
+C<< Package->init_code >>,
 that is, likely until the next process restart. This will lead to very
 weird behaviour, so don't do that.
 
@@ -369,6 +421,7 @@ sub startup {
     $package->init_code;
 }
 
+
 =head1 TODO
 
 =over 4
@@ -394,13 +447,21 @@ Everything Engine.
 
 Max Maischein, E<lt>corion@cpan.orgE<gt>
 
-=head1 LICENSE
+=head1 CREDITS
+
+Tye McQueen for suggesting the module name
+
+=head1 SEE ALSO
+
+The Everything Engine, L<http://everydevel.com/>
+
+=head1 AUTHOR
 
 This module is licensed under the same terms as Perl itself.
 
 =head1 ALTERNATIVE NAMES
 
-DBIx::Seven::Days, Nothing::Driver
+DBIx::Seven::Days, Nothing::Driver, Corion's::Code::From::Outer::Space
 
 =cut
 

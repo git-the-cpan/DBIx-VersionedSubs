@@ -8,14 +8,15 @@ DBIx::VersionedSubs::Server - HTTP server frontend for DBIx::VersionedSubs
 
 =head1 SYNOPSIS
 
-
+  ... to be done. Look at the source code and the programs
+  using this code in the meanwhile ...
 
 =cut
 
 __PACKAGE__->mk_accessors(qw(namespace dispatch));
 
 use vars '$VERSION';
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 sub new {
     my ($package,$args) = @_;
