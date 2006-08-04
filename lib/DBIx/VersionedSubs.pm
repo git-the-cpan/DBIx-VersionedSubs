@@ -67,7 +67,7 @@ __PACKAGE__->mk_classdata($_)
 
 use vars qw'%default_values $VERSION';
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 %default_values = (
     dbh          => undef,

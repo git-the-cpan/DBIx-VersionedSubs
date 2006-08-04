@@ -1,3 +1,10 @@
+0.03 20060804
+    * Added AutoLoad.pm which does lazy loading of code
+      instead of loading all of the code all of the time
+    * Added tests for AutoLoad.pm which ensure that the
+      behaviour is identical across the two versions
+      except where it isn't.
+
 0.02 20060726
     * Added SEE ALSO and ALTERNATIVE NAMES sections, credited Tye for the name
     * Added missing prerequisites for the examples
