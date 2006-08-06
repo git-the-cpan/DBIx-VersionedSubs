@@ -67,7 +67,7 @@ __PACKAGE__->mk_classdata($_)
 
 use vars qw'%default_values $VERSION';
 
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 %default_values = (
     dbh          => undef,
@@ -455,7 +455,7 @@ Tye McQueen for suggesting the module name
 
 The Everything Engine, L<http://everydevel.com/>
 
-=head1 AUTHOR
+=head1 LICENSE
 
 This module is licensed under the same terms as Perl itself.
 

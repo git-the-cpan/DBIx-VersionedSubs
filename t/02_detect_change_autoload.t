@@ -11,10 +11,6 @@ use lib 'eg/lib';
 use base 'My::App';
 __PACKAGE__->setup();
 
-#sub func {
-#    return "original value"
-#}
-
 package main;
 use strict;
 use Test::More tests => 8;
@@ -22,7 +18,6 @@ use DBI;
 
 my $dsn = $ENV{TEST_MRVAIN_DBI_DSN} || "dbi:SQLite:dbname=:memory:";
 
-#My::App::Test->setup;
 My::App::Test->connect($dsn);
 My::App::Test->dbh->do( $_ ) for split /;\n/sm, <<"";
     CREATE TABLE code_live (name VARCHAR(64),code VARCHAR(65536));
@@ -36,7 +31,6 @@ My::App::Test->dbh->do( $_ ) for split /;\n/sm, <<"";
     );
     INSERT INTO code_live (name,code) VALUES ('func','return "value 1"');
 
-#is My::App::Test::func(),"original value","Unoverridden code works";
 My::App::Test->init_code;
 
 my $initial_db_code_version = My::App::Test->live_code_version;

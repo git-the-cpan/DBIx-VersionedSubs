@@ -4,11 +4,11 @@ use base 'DBIx::VersionedSubs';
 use vars qw($VERSION);
 use Carp qw(carp croak);
 
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 =head1 NAME
 
-DBIx::VersionedSubs::AutoLoad - autload subroutines from the database
+DBIx::VersionedSubs::AutoLoad - autoload subroutines from the database
 
 =head1 SYNOPSIS
 
@@ -72,8 +72,11 @@ sub init_code {
         carp "$package->init_code called, but there already is an AUTOLOAD handler installed.";
     };
 
-    my $begin = $package->load_code('BEGIN');
-    if ($begin) { $begin->() };
+    my $begin = $package->retrieve_code('BEGIN');
+    if (defined $begin) {
+        eval "{ $begin }";
+        carp "$package\::BEGIN: $@" if $@
+    };
 };
 
 =head2 C<< __PACKAGE__->install_and_invoke NAME, ARGS >>
@@ -131,10 +134,14 @@ SQL
 
         delete $package->code_source->{$name};
 
-        # No need for AUTOLOAD as we know what to do
+        # This manual AUTOLOAD is less than ideal
         no strict 'refs';
         no warnings 'redefine';
-        *{"$package\::$name"} = sub { $package->install_and_invoke( $name, @_ ); };
+        *{"$package\::$name"} = sub {
+            local *AUTOLOAD = "$package\::$name";
+            goto &{"$package\::AUTOLOAD"};
+        };
+        # = sub { $package->install_and_invoke( $name, @_ ); };
     }
     $package->code_version($current_version);
 };
@@ -151,6 +158,24 @@ to install it.
 sub load_code {
     my ($package,$name) = @_;
 
+    my $code = $package->retrieve_code($name);
+    if (! defined $code) {
+        # let caller decide whether to croak or to ignore
+        return;
+    };
+    $package->create_sub($name,$code);
+};
+
+=head2 C<< __PACKAGE__->retrieve_code NAME >>
+
+Retrieves the code for the subroutine C<NAME>
+from the database and returns it as a string.
+
+=cut
+
+sub retrieve_code {
+    my ($package,$name) = @_;
+
     my $sql = sprintf <<'SQL', $package->code_live;
         SELECT code FROM %s
            WHERE name = ?
@@ -160,11 +185,11 @@ SQL
     if (! $sth->execute($name)) {
         # let caller decide whether to croak or to ignore
         return;
-    };
-    my ($code) = $sth->fetchrow();
+    }
+    my($code) = $sth->fetchrow;
     $sth->finish;
 
-    $package->create_sub($name,$code);
+    return $code
 };
 
 =head1 INSTALLED CODE
@@ -180,3 +205,25 @@ is issued.
 =cut
 
 1;
+
+=head1 BUGS
+
+=over 4
+
+=item * Currently, if a routine gets changed, the AUTOLOAD
+handler is not fired directly but by using a callback. This
+is because I couldn't delete the typeglob properly such
+that the AUTOLOAD fires again.
+
+=back
+
+=head1 AUTHOR
+
+Max Maischein, E<lt>corion@cpan.orgE<gt>
+
+=head1 LICENSE
+
+This module is licensed under the same terms as Perl itself.
+
+=cut
+

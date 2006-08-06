@@ -1,3 +1,11 @@
+    ! Need to add a test for removal of code
+
+0.04 20060806
+    * ::AutoLoad didn't remove subroutines that had
+      expired. This bug remains open but there is a
+      workaround in place which replaces changed subs
+      with code that re-fires AUTOLOAD.
+
 0.03 20060804
     * Added AutoLoad.pm which does lazy loading of code
       instead of loading all of the code all of the time
