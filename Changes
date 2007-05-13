@@ -1,5 +1,13 @@
     ! Need to add a test for removal of code
 
+0.05 20070513
+    * The code now gets put not only into the right package
+      but it also gets compiled with the right package, so
+      BEGIN{...} blocks can be used to declare variables.
+    * Added tests for syntax errors in blocks
+    * Added tests for strict errors in blocks
+    * Added tests for __PACKAGE__
+
 0.04 20060806
     * ::AutoLoad didn't remove subroutines that had
       expired. This bug remains open but there is a

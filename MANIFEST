@@ -27,3 +27,6 @@ t/01_setup_autoload.t
 t/02_create_sub_autoload.t
 t/02_best_practices_autoload.t
 t/02_detect_change_autoload.t
+t/03_strict.t
+t/03_package.t
+t/03_syntax_error.t

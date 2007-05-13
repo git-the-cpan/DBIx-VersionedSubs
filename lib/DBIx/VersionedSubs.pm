@@ -67,7 +67,7 @@ __PACKAGE__->mk_classdata($_)
 
 use vars qw'%default_values $VERSION';
 
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 %default_values = (
     dbh          => undef,
@@ -122,6 +122,9 @@ Connects to the database with the credentials given.
 If called in void context, stores the DBI handle in the
 C<dbh> accessor, otherwise returns the DBI handle.
 
+If you already have an existing database handle, just
+set the C<dbh> accessor with it instead.
+
 =cut
 
 sub connect {
@@ -142,6 +145,7 @@ If you want a code block to be run automatically
 when loaded from the database, you can name it C<BEGIN>.
 The loader code basically uses
 
+    package $package;
     *{"$package\::$name"} = eval "sub { $code }"
 
 so you cannot stuff attributes and other whatnot 
@@ -153,6 +157,8 @@ As the code elements are loaded by C<init_code> in alphabetical
 order on the name, your C<Aardvark> and C<AUTOLOAD> subroutines
 will still be loaded before your C<BEGIN> block runs.
 
+The C<BEGIN> block will be called with the package name in C<@_>.
+
 Also, names like C<main::foo> or C<Other::Package::foo> are possible
 but get stuffed below C<$package>. The practice doesn't get saner there.
 
@@ -161,6 +167,7 @@ but get stuffed below C<$package>. The practice doesn't get saner there.
 sub create_sub {
     my ($package,$name,$code) = @_;
     my $perl_code = <<CODE;
+        package $package;
         #line $package/$name#1
         sub {$code} 
 CODE
@@ -426,6 +433,9 @@ sub startup {
 
 =over 4
 
+=item * Find out how to implement C<use strict;> and C<use vars;>
+in a global way instead of restricted to the scope of a C<BEGIN {...}> block.
+
 =item * Implement closures (marked via a bare block)
 
 =item * Find a saner way instead of C<< ->setup >> and C<%default_values>
@@ -434,7 +444,6 @@ usage across packages. The "classic" approach of using Class::Data::Inheritable
 means that there is the risk of sharing the C<code_source> reference across
 namespaces which is wrong. Maybe the accessor should simply be smart
 and depend on the namespace it was called with instead of a stock accessor
- (slated for v0.02)
 
 =item * Discuss whether it's sane
 to store all your code with your data in the database.
