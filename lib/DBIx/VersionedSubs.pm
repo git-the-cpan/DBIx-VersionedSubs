@@ -24,6 +24,19 @@ DBIx::VersionedSubs - all your code are belong into the DB
         My::App->handle_request($request);
     }
 
+And C<handle_request> might look like the following in the DB:
+
+    sub handle_request {
+        my ($request) = @_;
+	my %args = split /[=;]/, $request;
+	my $method = delete $args{method};
+	no strict 'refs';
+	&{$method}( %args );
+    }
+
+See C<eg/> for a sample HTTP implementation of a framework based
+on this concept.
+
 =head1 ABSTRACT
 
 This module implements a minimal driver to load 
@@ -67,7 +80,7 @@ __PACKAGE__->mk_classdata($_)
 
 use vars qw'%default_values $VERSION';
 
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 %default_values = (
     dbh          => undef,
@@ -428,13 +441,22 @@ sub startup {
     $package->init_code;
 }
 
+=head1 BEST PRACTICES
+
+The most bare-bones hosting package looks like the following (see also
+C<eg/lib/My/App.pm> in the distribution):
+
+    package My::App;
+    use strict;
+    use base 'DBIx::VersionedSubs';
+
+Global variables are best declared within the C<BEGIN> block. You will find
+typos or use of undeclared variables reported to C<STDERR> as the
+subroutines get compiled.
 
 =head1 TODO
 
 =over 4
-
-=item * Find out how to implement C<use strict;> and C<use vars;>
-in a global way instead of restricted to the scope of a C<BEGIN {...}> block.
 
 =item * Implement closures (marked via a bare block)
 

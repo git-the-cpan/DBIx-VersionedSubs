@@ -4,7 +4,7 @@ use base 'DBIx::VersionedSubs';
 use vars qw($VERSION);
 use Carp qw(carp croak);
 
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 =head1 NAME
 
