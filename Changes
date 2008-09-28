@@ -1,6 +1,10 @@
     ! Need to add a test for removal of code
     ! Consider adding the DSN as __FILE__
 
+0.07 20080928
+    * Added DBIx/VersionedSubs/Hash.pm
+    * More tests for ::Hash
+
 0.06 20070819
     * Documentation updates
     * t/99-versions.t needs File::Slurp

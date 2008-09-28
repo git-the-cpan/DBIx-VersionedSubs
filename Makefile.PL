@@ -7,9 +7,8 @@ WriteMakefile(
     'PREREQ_PM'    => { 'Class::Data::Inheritable' => 0,
                         'DBD::SQLite'     => 1.09, # Needed for testing only
                         'Template'        => 0,    # Needed for sample code only
-                        'Class::Accessor' => 0,    #
 			'HTTP::Server::Simple' => 0, # for the examples
-                      }, # e.g., Module::Name => 1.1
+                      }, 
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => 'lib/DBIx/VersionedSubs.pm', # retrieve abstract from module
        AUTHOR     => 'Max Maischein <corion@cpan.org>') : ()),

@@ -80,7 +80,7 @@ __PACKAGE__->mk_classdata($_)
 
 use vars qw'%default_values $VERSION';
 
-$VERSION = '0.06';
+$VERSION = '0.07';
 
 %default_values = (
     dbh          => undef,
@@ -126,6 +126,7 @@ sub setup {
             $package->$def($defaults{$def});
         };
     }
+    $package;
 };
 
 =head2 C<< Package->connect DSN,User,Pass,Options >>
@@ -179,28 +180,67 @@ but get stuffed below C<$package>. The practice doesn't get saner there.
 
 sub create_sub {
     my ($package,$name,$code) = @_;
+    my $package_name = ref $package || $package;
+
+    my $ref = $package->eval_sub($package_name,$name,$code);
+    if ($ref) {
+        if ($name eq 'BEGIN') {
+            $ref->($package);
+            return undef
+        } else {
+            no strict 'refs';
+            no warnings 'redefine';
+            *{"$package\::$name"} = $ref;
+            $package->code_source->{$name} = $code;
+            #warn "Set $package\::$name to " . $package->code_source->{$name};
+            return $ref
+        };
+    };
+}
+
+=head2 C<< Package->eval_sub PACKAGE, NAME, CODE >>
+
+Helper method to take a piece of code and to return
+a code reference with the correct file/line information.
+
+Raises a warning if code doesn't compile. Returns
+the reference to the code or C<undef> if there was an error.
+
+=cut
+
+sub eval_sub {
+    my ($self,$package,$name,$code) = @_;
     my $perl_code = <<CODE;
         package $package;
-        #line $package/$name#1
+#line $package/$name#1
         sub {$code} 
 CODE
 
     my $ref = eval $perl_code;
-    if ($@) {
-        warn $perl_code . "\n$package\::$name>> $@";
-        return undef
-    } elsif ($name eq 'BEGIN') {
-        $ref->($package);
-        return undef
+    if (my $err = $@) {
+        warn $perl_code . "\n$package\::$name>> $err";
+	return undef
     } else {
-        no strict 'refs';
-        no warnings 'redefine';
-        *{"$package\::$name"} = $ref;
-        $package->code_source->{$name} = $code;
-        #warn "Set $package\::$name to " . $package->code_source->{$name};
         return $ref
     };
-}
+};
+
+=head2 C<< Package->destroy_sub $name >>
+
+Destroy the subroutine named C<$name>. For the default
+implementation, this replaces the subroutine with a
+dummy subroutine that C<croak>s.
+
+=cut
+
+sub destroy_sub {
+    my ($package,$name) = @_;
+    $package->create_sub($name,<<ERROR_SUB);
+        use Carp qw(croak);
+        croak "Undefined subroutine '$name' called"
+ERROR_SUB
+    delete $package->code_source->{$name};
+};
 
 =head2 C<< Package->live_code_version >>
 
@@ -290,11 +330,7 @@ SQL
         } elsif ($action eq 'U') {
             $package->create_sub($name,$code);
         } elsif ($action eq 'D') {
-            $package->create_sub($name,<<ERROR_SUB);
-                    use Carp qw(croak);
-                    croak "Undefined subroutine '$name' called"
-ERROR_SUB
-            delete $package->code_source->{$name};
+	    $package->destroy_sub($name);
         };
     }
     $package->code_version($current_version);

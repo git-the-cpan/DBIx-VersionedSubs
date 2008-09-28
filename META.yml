@@ -1,15 +1,17 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         DBIx-VersionedSubs
-version:      0.06
-version_from: lib/DBIx/VersionedSubs.pm
-installdirs:  site
-requires:
-    Class::Accessor:               0
+--- #YAML:1.0
+name:                DBIx-VersionedSubs
+version:             0.07
+abstract:            all your code are belong into the DB
+license:             ~
+author:              
+    - Max Maischein <corion@cpan.org>
+generated_by:        ExtUtils::MakeMaker version 6.42
+distribution_type:   module
+requires:     
     Class::Data::Inheritable:      0
     DBD::SQLite:                   1.09
     HTTP::Server::Simple:          0
     Template:                      0
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.30
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3
