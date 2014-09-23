@@ -1,6 +1,10 @@
     ! Need to add a test for removal of code
     ! Consider adding the DSN as __FILE__
 
+0.08 20140924
+    * Changed Everything website (RT #39669), noted by DUNCAND
+    * Fix for Perl 5.21.4
+
 0.07 20080928
     * Added DBIx/VersionedSubs/Hash.pm
     * More tests for ::Hash

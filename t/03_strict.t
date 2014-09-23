@@ -35,7 +35,7 @@ no warnings 'once';
 
 My::App::Test->init_code;
 
-like $warnings, '/Global symbol "\$undeclared_var" requires explicit package name at /', 'The correct warnings get raised for undeclared variables';
+like $warnings, '/Global symbol "\$undeclared_var" requires explicit package name /', 'The correct warnings get raised for undeclared variables';
 isn't 'My::App::Test'->can('test_declared_var'), undef, "Some code was defined for 'test_declared_var'";
 is 'My::App::Test'->can('test_undeclared_var'), undef, "No code was defined for 'test_undeclared_var' because of the 'strict' error";
 My::App::Test::test_declared_var();

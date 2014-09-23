@@ -80,7 +80,7 @@ __PACKAGE__->mk_classdata($_)
 
 use vars qw'%default_values $VERSION';
 
-$VERSION = '0.07';
+$VERSION = '0.08';
 
 %default_values = (
     dbh          => undef,
@@ -520,7 +520,7 @@ Tye McQueen for suggesting the module name
 
 =head1 SEE ALSO
 
-The Everything Engine, L<http://everydevel.com/>
+The Everything Engine, L<http://everydevel.everything2.com/>
 
 =head1 LICENSE
 
